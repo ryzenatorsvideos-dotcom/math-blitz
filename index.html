@@ -1,1 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Blitz</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #111827, #312e81, #581c87);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .game {
+      width: min(92%, 700px);
+      min-height: 600px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      letter-spacing: 3px;
+    }
+
+    .subtitle {
+      color: #cbd5e1;
+      margin-bottom: 30px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 15px 28px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      background: #6366f1;
+      color: white;
+    }
+
+    button:hover {
+      transform: scale(1.04);
+      opacity: 0.9;
+    }
+
+    .start-btn {
+      font-size: 1.3rem;
+      padding: 18px 45px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .stat {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      display: block;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .timer-bar {
+      width: 100%;
+      height: 12px;
+      background: #1e293b;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    #timerFill {
+      width: 100%;
+      height: 100%;
+      background: #22c55e;
+      transition: width 0.1s linear;
+    }
+
+    .question {
+      font-size: 4rem;
+      font-weight: bold;
+      margin: 35px 0;
+    }
+
+    #answer {
+      width: 100%;
+      max-width: 350px;
+      padding: 18px;
+      border: 2px solid #475569;
+      border-radius: 14px;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      font-size: 1.8rem;
+      outline: none;
+    }
+
+    #answer:focus {
+      border-color: #818cf8;
+    }
+
+    .message {
+      min-height: 30px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .correct {
+      color: #4ade80;
+    }
+
+    .wrong {
+      color: #f87171;
+    }
+
+    .final-score {
+      font-size: 4rem;
+      font-weight: bold;
+      margin: 25px 0;
+      color: #facc15;
+    }
+
+    .instructions {
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin: 25px auto;
+      max-width: 500px;
+    }
+
+    .difficulty {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .difficulty button {
+      padding: 10px 18px;
+      background: #334155;
+    }
+
+    .difficulty button.selected {
+      background: #6366f1;
+    }
+
+    @media (max-width: 600px) {
+      .game {
+        min-height: 100vh;
+        width: 100%;
+        border-radius: 0;
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: 2.6rem;
+      }
+
+      .question {
+        font-size: 3rem;
+      }
+
+      .stats {
+        flex-wrap: wrap;
+      }
+
+      .stat {
+        min-width: 30%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="game">
+
+    <!-- START SCREEN -->
+    <section id="startScreen" class="screen active">
+      <h1>⚡ MATH BLITZ</h1>
+
+      <p class="subtitle">
+        Think fast. Answer faster.
+      </p>
+
+      <p class="instructions">
+        Solve as many math problems as you can before time runs out.
+        Build combos to earn extra points!
+      </p>
+
+      <div class="difficulty">
+        <button id="easyBtn" class="selected">Easy</button>
+        <button id="mediumBtn">Medium</button>
+        <button id="hardBtn">Hard</button>
+      </div>
+
+      <button class="start-btn" id="startBtn">
+        START BLITZ
+      </button>
+    </section>
+
+
+    <!-- GAME SCREEN -->
+    <section id="gameScreen" class="screen">
+
+      <div class="stats">
+
+        <div class="stat">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="score">0</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-label">Combo</span>
+          <span class="stat-value" id="combo">0</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-label">Best</span>
+          <span class="stat-value" id="bestScore">0</span>
+        </div>
+
+      </div>
+
+      <div class="timer-bar">
+        <div id="timerFill"></div>
+      </div>
+
+      <div class="question" id="question">
+        5 + 5 = ?
+      </div>
+
+      <input
+        type="number"
+        id="answer"
+        placeholder="Your answer"
+        autocomplete="off"
+      >
+
+      <div class="message" id="message"></div>
+
+    </section>
+
+
+    <!-- GAME OVER SCREEN -->
+    <section id="gameOverScreen" class="screen">
+
+      <h1>TIME'S UP!</h1>
+
+      <p class="subtitle">
+        Great blitz!
+      </p>
+
+      <div class="final-score" id="finalScore">
+        0
+      </div>
+
+      <p id="finalMessage">
+        Can you beat your score?
+      </p>
+
+      <br>
+
+      <button id="playAgainBtn">
+        PLAY AGAIN
+      </button>
+
+      <button id="homeBtn">
+        HOME
+      </button>
+
+    </section>
+
+  </div>
+
+
+  <script>
+
+    // -----------------------------
+    // GAME VARIABLES
+    // -----------------------------
+
+    let score = 0;
+    let combo = 0;
+    let timeLeft = 30;
+    let timer;
+    let correctAnswer = 0;
+    let difficulty = "easy";
+
+    const maxTime = 30;
+
+
+    // -----------------------------
+    // ELEMENTS
+    // -----------------------------
+
+    const startScreen = document.getElementById("startScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const gameOverScreen = document.getElementById("gameOverScreen");
+
+    const startBtn = document.getElementById("startBtn");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+    const homeBtn = document.getElementById("homeBtn");
+
+    const question = document.getElementById("question");
+    const answer = document.getElementById("answer");
+
+    const scoreDisplay = document.getElementById("score");
+    const comboDisplay = document.getElementById("combo");
+    const bestScoreDisplay = document.getElementById("bestScore");
+
+    const timerFill = document.getElementById("timerFill");
+    const message = document.getElementById("message");
+
+    const finalScore = document.getElementById("finalScore");
+    const finalMessage = document.getElementById("finalMessage");
+
+
+    // -----------------------------
+    // HIGH SCORE
+    // -----------------------------
+
+    let bestScore = Number(localStorage.getItem("mathBlitzBest")) || 0;
+
+    bestScoreDisplay.textContent = bestScore;
+
+
+    // -----------------------------
+    // DIFFICULTY
+    // -----------------------------
+
+    document.getElementById("easyBtn").addEventListener("click", () => {
+      difficulty = "easy";
+      selectDifficulty("easyBtn");
+    });
+
+    document.getElementById("mediumBtn").addEventListener("click", () => {
+      difficulty = "medium";
+      selectDifficulty("mediumBtn");
+    });
+
+    document.getElementById("hardBtn").addEventListener("click", () => {
+      difficulty = "hard";
+      selectDifficulty("hardBtn");
+    });
+
+
+    function selectDifficulty(buttonId) {
+
+      document.querySelectorAll(".difficulty button").forEach(button => {
+        button.classList.remove("selected");
+      });
+
+      document.getElementById(buttonId).classList.add("selected");
+    }
+
+
+    // -----------------------------
+    // START GAME
+    // -----------------------------
+
+    startBtn.addEventListener("click", startGame);
+    playAgainBtn.addEventListener("click", startGame);
+
+
+    function startGame() {
+
+      score = 0;
+      combo = 0;
+      timeLeft = maxTime;
+
+      scoreDisplay.textContent = score;
+      comboDisplay.textContent = combo;
+
+      message.textContent = "";
+
+      showScreen(gameScreen);
+
+      generateQuestion();
+
+      answer.value = "";
+      answer.focus();
+
+      clearInterval(timer);
+
+      timer = setInterval(updateTimer, 100);
+    }
+
+
+    // -----------------------------
+    // SCREEN CONTROL
+    // -----------------------------
+
+    function showScreen(screen) {
+
+      document.querySelectorAll(".screen").forEach(item => {
+        item.classList.remove("active");
+      });
+
+      screen.classList.add("active");
+    }
+
+
+    // -----------------------------
+    // GENERATE QUESTION
+    // -----------------------------
+
+    function generateQuestion() {
+
+      let a;
+      let b;
+      let operation;
+
+      if (difficulty === "easy") {
+
+        a = randomNumber(1, 20);
+        b = randomNumber(1, 20);
+
+        operation = Math.random() < 0.5 ? "+" : "-";
+
+      }
+
+      else if (difficulty === "medium") {
+
+        a = randomNumber(5, 50);
+        b = randomNumber(2, 20);
+
+        const operations = ["+", "-", "×"];
+        operation = operations[randomNumber(0, 2)];
+
+      }
+
+      else {
+
+        a = randomNumber(10, 100);
+        b = randomNumber(2, 30);
+
+        const operations = ["+", "-", "×", "÷"];
+        operation = operations[randomNumber(0, 3)];
+
+        if (operation === "÷") {
+          a = a * b;
+        }
+      }
+
+
+      // Prevent negative answers on subtraction.
+
+      if (operation === "-" && b > a) {
+        [a, b] = [b, a];
+      }
+
+
+      switch (operation) {
+
+        case "+":
+          correctAnswer = a + b;
+          break;
+
+        case "-":
+          correctAnswer = a - b;
+          break;
+
+        case "×":
+          correctAnswer = a * b;
+          break;
+
+        case "÷":
+          correctAnswer = a / b;
+          break;
+      }
+
+
+      question.textContent = `${a} ${operation} ${b} = ?`;
+    }
+
+
+    // -----------------------------
+    // ANSWER CHECKING
+    // -----------------------------
+
+    answer.addEventListener("keydown", event => {
+
+      if (event.key !== "Enter") {
+        return;
+      }
+
+      checkAnswer();
+    });
+
+
+    function checkAnswer() {
+
+      if (answer.value.trim() === "") {
+        return;
+      }
+
+      const userAnswer = Number(answer.value);
+
+      if (userAnswer === correctAnswer) {
+
+        combo++;
+
+        const comboBonus = combo * 2;
+
+        score += 10 + comboBonus;
+
+        scoreDisplay.textContent = score;
+        comboDisplay.textContent = combo;
+
+        message.textContent = `✓ Correct! +${10 + comboBonus}`;
+        message.className = "message correct";
+
+      }
+
+      else {
+
+        combo = 0;
+
+        comboDisplay.textContent = combo;
+
+        message.textContent = `✗ Wrong! The answer was ${correctAnswer}`;
+        message.className = "message wrong";
+      }
+
+
+      answer.value = "";
+
+      generateQuestion();
+
+      answer.focus();
+    }
+
+
+    // -----------------------------
+    // TIMER
+    // -----------------------------
+
+    function updateTimer() {
+
+      timeLeft -= 0.1;
+
+      if (timeLeft <= 0) {
+
+        timeLeft = 0;
+
+        endGame();
+
+        return;
+      }
+
+
+      const percentage = (timeLeft / maxTime) * 100;
+
+      timerFill.style.width = `${percentage}%`;
+
+
+      if (percentage <= 25) {
+        timerFill.style.background = "#ef4444";
+      }
+
+      else if (percentage <= 50) {
+        timerFill.style.background = "#facc15";
+      }
+
+      else {
+        timerFill.style.background = "#22c55e";
+      }
+    }
+
+
+    // -----------------------------
+    // END GAME
+    // -----------------------------
+
+    function endGame() {
+
+      clearInterval(timer);
+
+      if (score > bestScore) {
+
+        bestScore = score;
+
+        localStorage.setItem(
+          "mathBlitzBest",
+          bestScore
+        );
+      }
+
+      bestScoreDisplay.textContent = bestScore;
+
+      finalScore.textContent = score;
+
+      if (score >= 500) {
+        finalMessage.textContent = "⚡ Incredible! You're a Math Blitz master!";
+      }
+
+      else if (score >= 250) {
+        finalMessage.textContent = "🔥 Nice run! That was seriously fast!";
+      }
+
+      else if (score >= 100) {
+        finalMessage.textContent = "💪 Good job! Keep practicing!";
+      }
+
+      else {
+        finalMessage.textContent = "🚀 Keep going! You can beat that score!";
+      }
+
+      showScreen(gameOverScreen);
+    }
+
+
+    // -----------------------------
+    // HOME BUTTON
+    // -----------------------------
+
+    homeBtn.addEventListener("click", () => {
+
+      clearInterval(timer);
+
+      showScreen(startScreen);
+
+    });
+
+
+    // -----------------------------
+    // RANDOM NUMBER
+    // -----------------------------
+
+    function randomNumber(min, max) {
+
+      return Math.floor(
+        Math.random() * (max - min + 1)
+      ) + min;
+    }
+
+  </script>
+
+</body>
+</html>
